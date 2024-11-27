@@ -22,8 +22,9 @@ struct CheckCommand: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let updater = Updater(githubRepo: options.repo, workflowAssetName: options.workflowAssetName)
-        let release = try await updater.check(maxCacheAge: maxCacheAge)
-        print(release)
+        await GUIUpdater().run()
+//        let updater = Updater(githubRepo: options.repo, workflowAssetName: options.workflowAssetName)
+//        let release = try await updater.check(maxCacheAge: maxCacheAge)
+//        print(release)
     }
 }

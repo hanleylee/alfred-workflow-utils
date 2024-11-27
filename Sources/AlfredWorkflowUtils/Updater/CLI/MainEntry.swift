@@ -8,7 +8,7 @@
 import Foundation
 
 @main
-struct App {
+struct MainEntry {
     static func main() async {
         await Command.main()
     }
