@@ -8,16 +8,16 @@
 import Foundation
 
 @propertyWrapper
-struct AppStorageCodable<Value: Codable> {
+public struct AppStorageCodable<Value: Codable> {
     private let key: String
     private let store: UserDefaults
 
-    init(_ key: String, store: UserDefaults = .standard) {
+    public init(_ key: String, store: UserDefaults = .standard) {
         self.key = key
         self.store = store
     }
 
-    var wrappedValue: Value? {
+    public var wrappedValue: Value? {
         get {
             guard let jsonData = store.data(forKey: key) else { return nil }
             return try? JSONDecoder().decode(Value.self, from: jsonData)

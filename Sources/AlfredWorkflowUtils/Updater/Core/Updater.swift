@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import AlfredCore
 
 public class Updater {
     private let githubRepo: String
     private let workflowAssetName: String
 
     @AppStorageCodable("LATEST_RELEASE_INFO", store: CommonTools.sharedUserDefaults)
-    private var latestReleaseInfo: GitHubRelease?
+    public private(set) var latestReleaseInfo: GitHubRelease?
 
     @AppStorageCodable("LAST_CHECKED_TIME", store: CommonTools.sharedUserDefaults)
     private var lastCheckedTime: Date?

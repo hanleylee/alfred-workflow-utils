@@ -25,13 +25,18 @@ let package = Package(
         ),
         .target(
             name: "AlfredWorkflowUpdaterCore",
-            dependencies: [],
+            dependencies: ["AlfredCore"],
             path: "Sources/AlfredWorkflowUtils/Updater/Core"
         ),
         .target(
             name: "AlfredWorkflowScriptFilter",
             dependencies: [],
             path: "Sources/AlfredWorkflowUtils/ScriptFilter"
+        ),
+        .target(
+            name: "AlfredCore",
+            dependencies: [],
+            path: "Sources/AlfredWorkflowUtils/AlfredCore"
         ),
         .testTarget(
             name: "AlfredWorkflowUtilsTests",
