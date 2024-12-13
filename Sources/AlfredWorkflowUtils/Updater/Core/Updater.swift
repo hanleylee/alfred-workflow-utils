@@ -11,32 +11,26 @@ import AlfredCore
 public class Updater {
     private let githubRepo: String
     private let workflowAssetName: String
+    /// Interval to check update on GitHub, in second
+    private let checkInterval: TimeInterval
 
     @AppStorageCodable("LATEST_RELEASE_INFO", store: CommonTools.sharedUserDefaults)
     public private(set) var latestReleaseInfo: GitHubRelease?
 
-    @AppStorageCodable("LAST_CHECKED_TIME", store: CommonTools.sharedUserDefaults)
-    private var lastCheckedTime: Date?
-
-    public init(githubRepo: String, workflowAssetName: String) {
+    public init(githubRepo: String, workflowAssetName: String, checkInterval: TimeInterval = 60*60*24) {
         self.githubRepo = githubRepo
         self.workflowAssetName = workflowAssetName
+        self.checkInterval = checkInterval
     }
 
-    public func check(maxCacheAge: Int) async throws -> GitHubRelease? {
-        if let latestReleaseInfo, !enoughTimeHasElapsed(maxCacheAge: maxCacheAge) {
-            // use cached info if it exist, and is not expire
-            return latestReleaseInfo
-        } else {
-            guard let release = try await getLatestRelease(for: githubRepo) else { return nil }
-            latestReleaseInfo = release
-            lastCheckedTime = Date()
-            return release
-        }
+    public func check() async throws -> GitHubRelease? {
+        guard let release = try await requestLatestRelease(for: githubRepo) else { return nil }
+        latestReleaseInfo = release
+        return release
     }
 
     public func downloadLatestRelease() async throws {
-        guard let release = try await check(maxCacheAge: 0) else { return }
+        guard let release = try await check() else { return }
         guard let downloadURL = release.assets.first(where: { $0.name == self.workflowAssetName })?.browserDownloadURL else { return }
 
         let destinationURL = try await download(fileURL: downloadURL)
@@ -44,13 +38,13 @@ public class Updater {
     }
 
     public func openLatestReleasePage() async throws {
-        guard let release = try await check(maxCacheAge: 0) else { return }
+        guard let release = try await check() else { return }
 
         try? open(args: [release.htmlUrl])
     }
 
     public func updateToLatest() async throws {
-        guard let release = try await check(maxCacheAge: 0) else { return }
+        guard let release = try await check() else { return }
 
         if AlfredConst.workflowVersion?.compare(release.tagName, options: .numeric) == .orderedAscending {
             // ascending, newer version exist
@@ -68,16 +62,16 @@ public class Updater {
 }
 
 extension Updater {
-    private func enoughTimeHasElapsed(maxCacheAge minutes: Int) -> Bool {
-        guard let lastCheckedTime else { return true }
+    public func cacheValid() -> Bool {
+        guard let lastCheckedTimestamp = self.latestReleaseInfo?.lastCheckedTimestamp else { return false }
 
-        guard let thresholdDate = Calendar.current.date(byAdding: .minute, value: minutes, to: lastCheckedTime) else { return true }
-        let now = Date()
+        let endTimestamp =  checkInterval + lastCheckedTimestamp
+        let now = Date.now.timeIntervalSince1970
 
-        return now > thresholdDate ? true : false
+        return now > endTimestamp ? false : true
     }
 
-    private func getLatestRelease(for gitHubRepository: String) async throws -> GitHubRelease? {
+    private func requestLatestRelease(for gitHubRepository: String) async throws -> GitHubRelease? {
         let latestReleaseURL = "https://api.github.com/repos/\(gitHubRepository)/releases/latest"
 
         guard let url = URL(string: latestReleaseURL) else {
@@ -85,9 +79,14 @@ extension Updater {
             return nil
         }
 
+//        URLCache.shared.removeAllCachedResponses()
+//        var request = URLRequest(url: url)
+        // 默认情况下使用协议中的约定, 可能会使用缓存, 这里可以强制每次都从服务器获取新数据
+//        request.cachePolicy = .reloadIgnoringLocalCacheData
         let (data, _) = try await URLSession.shared.data(from: url)
 
-        let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
+        var release = try JSONDecoder().decode(GitHubRelease.self, from: data)
+        release.lastCheckedTimestamp = Date.now.timeIntervalSince1970
 
         guard release.assets.contains(where: { $0.name == self.workflowAssetName }) else {
             print("Failed to find matching asset")

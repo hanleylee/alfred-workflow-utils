@@ -22,10 +22,14 @@ public struct GitHubRelease: Codable {
     public let tagName: String
     public let assets: [Asset]
 
+    // === private ===
+    var lastCheckedTimestamp: TimeInterval?
+
     enum CodingKeys: String, CodingKey {
         case htmlUrl = "html_url"
         case tagName = "tag_name"
         case assets
+        case lastCheckedTimestamp
     }
 }
 
