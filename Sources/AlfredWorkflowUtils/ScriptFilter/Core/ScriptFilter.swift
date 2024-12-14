@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ItemFilteringProperty {
+public enum ItemVisibleComponent {
     case title
     case subtitle
 }
@@ -81,7 +81,7 @@ public final class ScriptFilter: HasVariables {
     }
 
     @discardableResult
-    public static func filterItems(by property: ItemFilteringProperty = .title, containing term: String) -> ScriptFilter.Type {
+    public static func filterItems(by property: ItemVisibleComponent = .title, containing term: String) -> ScriptFilter.Type {
         if !term.isEmpty {
             shared.items = shared.items.filter { items in
                 switch property {

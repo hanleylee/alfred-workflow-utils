@@ -27,6 +27,7 @@ import Foundation
  "alfred_workflow_uid" = "user.workflow.B0AC54EC-601C-479A-9428-01F9FD732959";
  "alfred_debug" = 1;
  */
+import AppKit
 
 public struct AlfredConst {
     private init() {}
@@ -45,5 +46,20 @@ public struct AlfredConst {
     public static let workflowVersion = ProcessInfo.processInfo.environment["alfred_workflow_version"]
     public static let workflowUID = ProcessInfo.processInfo.environment["alfred_workflow_uid"]
     public static let debug = ProcessInfo.processInfo.environment["alfred_debug"]
+    
+    public static let ALFRED_BUNDLE_ID = "com.runningwithcrayons.Alfred"
+    public static var ALFRED_INSTALL_URL: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: ALFRED_BUNDLE_ID) }
+    //    public static var currentVersion: String? {
+    //        let url = URL(fileURLWithPath: "\(AlfredConst.preferencesFolder)/workflows/\(AlfredConst.workflowUID)/info.plist")
+    //
+    //        if let workflowData = try? Data(contentsOf: url),
+    //           let info = try? PropertyListSerialization.propertyList(from: workflowData, options: [], format: nil) as? [String: Any],
+    //           let version = info["version"] as? String
+    //        {
+    //            return version
+    //        } else {
+    //            return nil
+    //        }
+    //    }
 }
 

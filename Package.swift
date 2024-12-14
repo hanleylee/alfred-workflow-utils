@@ -30,7 +30,9 @@ let package = Package(
         ),
         .target(
             name: "AlfredWorkflowScriptFilter",
-            dependencies: [],
+            dependencies: [
+                "AlfredCore",
+            ],
             path: "Sources/AlfredWorkflowUtils/ScriptFilter"
         ),
         .target(
