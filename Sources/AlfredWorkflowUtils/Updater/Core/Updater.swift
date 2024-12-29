@@ -49,13 +49,13 @@ public class Updater {
         if AlfredConst.workflowVersion?.compare(release.tagName, options: .numeric) == .orderedAscending {
             // ascending, newer version exist
             guard let downloadURL = release.assets.first(where: { $0.name == self.workflowAssetName })?.browserDownloadURL else {
-                print("Download url not found!")
+                AlfredUtils.log("Download url not found!")
                 return
             }
             let destinationURL = try await download(fileURL: downloadURL)
             try? open(args: [destinationURL.path])
         } else {
-            print("Current version is up-to-date")
+            AlfredUtils.log("Current version is up-to-date")
             return
         }
     }
@@ -75,7 +75,7 @@ extension Updater {
         let latestReleaseURL = "https://api.github.com/repos/\(gitHubRepository)/releases/latest"
 
         guard let url = URL(string: latestReleaseURL) else {
-            print("Invalid URL")
+            AlfredUtils.log("Invalid URL")
             return nil
         }
 
@@ -89,7 +89,7 @@ extension Updater {
         release.lastCheckedTimestamp = Date.now.timeIntervalSince1970
 
         guard release.assets.contains(where: { $0.name == self.workflowAssetName }) else {
-            print("Failed to find matching asset")
+            AlfredUtils.log("Failed to find matching asset")
             return nil
         }
 
